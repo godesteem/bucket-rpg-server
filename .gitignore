@@ -1,0 +1,7 @@
+*.cmake
+Makefile
+BucketServer
+BucketServer-test
+CMakeCache.txt
+CMakeFiles/
+
