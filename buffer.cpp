@@ -2,7 +2,7 @@
  * File              : buffer.cpp
  * Author            : Philipp Zettl <philipp.zettl@godesteem.de>
  * Date              : 22.01.2020
- * Last Modified Date: 22.01.2020
+ * Last Modified Date: 23.01.2020
  * Last Modified By  : Philipp Zettl <philipp.zettl@godesteem.de>
  */
 
@@ -19,4 +19,8 @@ void Buffer::alloc(size_t size){
 
 void Buffer::concat(void *lists){
 
+}
+
+void* Buffer::getContent(){
+  return content;
 }

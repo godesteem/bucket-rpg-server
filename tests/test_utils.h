@@ -2,7 +2,7 @@
  * File              : test_utils.h
  * Author            : Philipp Zettl <philipp.zettl@godesteem.de>
  * Date              : 22.01.2020
- * Last Modified Date: 22.01.2020
+ * Last Modified Date: 25.01.2020
  * Last Modified By  : Philipp Zettl <philipp.zettl@godesteem.de>
  */
 #ifndef TEST_UTILS_H
