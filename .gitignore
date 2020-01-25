@@ -5,3 +5,4 @@ BucketServer-test
 CMakeCache.txt
 CMakeFiles/
 
+.idea/

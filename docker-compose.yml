@@ -1,0 +1,13 @@
+version: '2'
+
+services:
+  server:
+    image: bucker-server
+    build:
+      context: ./
+    volumes:
+      - .:/opt/data
+    ports:
+      - "0.0.0.0:6666:6666/udp"
+    command: python3 script.py
+
