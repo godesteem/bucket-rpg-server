@@ -9,9 +9,6 @@ import asyncio
 import json
 import logging
 import uuid
-import os
-
-import websockets
 
 logging.basicConfig()
 
@@ -149,8 +146,7 @@ class Server:
     async def unregister_socket(self, websocket):
         self.remove_user_by_socket(websocket)
         await self.notify_disconnect(Message(type='D', user_id=0, recipient_id=-1, data={}, peer_id=None))
-        # await notify_users()
-    
+
     async def system(self, msg):
         signal = msg.data.get('signal')
         if signal:
@@ -164,34 +160,27 @@ class Server:
         await self.register_socket(websocket)
         try:
             async for message in websocket:
-                msg = Message.from_dict(json.loads(message))
-                type_map = {
-                    "C": self.notify_connect,
-                    "J": self.notify_joined,
-                    "D": self.notify_disconnect,
-                    "M": self.sent_to_all,
-                    "P": self.sent_to_all,
-                    "R": self.register,
-                    "S": self.system,
-                }
-                process_method = type_map.get(msg.type)
-    
-                if process_method:
-                    while self.registration_open:
-                        await asyncio.sleep(0.1)
-                    await process_method(msg)
-                    print(f"processed event: {msg}")
-                else:
-                    logging.error(f"unsupported event: {msg}")
+                await self.process_event(message)
         finally:
             await self.unregister_socket(websocket)
 
+    async def process_event(self, message):
+        msg = Message.from_dict(json.loads(message))
+        type_map = {
+            "C": self.notify_connect,
+            "J": self.notify_joined,
+            "D": self.notify_disconnect,
+            "M": self.sent_to_all,
+            "P": self.sent_to_all,
+            "R": self.register,
+            "S": self.system,
+        }
+        process_method = type_map.get(msg.type)
 
-server = Server()
-url = os.environ.get("URL", "localhost")
-port = os.environ.get('PORT', 6666)
-start_server = websockets.serve(server.run, url, port)
-
-asyncio.get_event_loop().run_until_complete(start_server)
-print(f'Server running on {url}:{port}')
-asyncio.get_event_loop().run_forever()
+        if process_method:
+            while self.registration_open:
+                await asyncio.sleep(0.1)
+            await process_method(msg)
+            print(f"processed event: {msg}")
+        else:
+            logging.error(f"unsupported event: {msg}")
