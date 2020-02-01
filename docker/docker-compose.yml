@@ -4,7 +4,7 @@ services:
   server:
     image: bucker-server
     build:
-      context: ./
+      context: ..
     volumes:
       - .:/opt/data
     ports:

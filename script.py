@@ -1,4 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# File              : script.py
+# Author            : Philipp Zettl <philipp.zettl@godesteem.de>
+# Date              : 01.02.2020
+# Last Modified Date: 01.02.2020
+# Last Modified By  : Philipp Zettl <philipp.zettl@godesteem.de>
 import asyncio
 import json
 import logging
@@ -181,7 +187,7 @@ class Server:
 
 
 server = Server()
-start_server = websockets.serve(server.run, "10.0.0.2", 6666)
+start_server = websockets.serve(server.run, "0.0.0.0", 6666)
 
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()
