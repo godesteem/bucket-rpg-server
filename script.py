@@ -9,6 +9,7 @@ import asyncio
 import json
 import logging
 import uuid
+import os
 
 import websockets
 
@@ -187,7 +188,10 @@ class Server:
 
 
 server = Server()
-start_server = websockets.serve(server.run, "0.0.0.0", 6666)
+url = os.environ.get("URL", "localhost")
+port = os.environ.get('PORT', 6666)
+start_server = websockets.serve(server.run, url, port)
 
 asyncio.get_event_loop().run_until_complete(start_server)
+print(f'Server running on {url}:{port}')
 asyncio.get_event_loop().run_forever()
