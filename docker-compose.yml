@@ -8,6 +8,5 @@ services:
     volumes:
       - .:/opt/data
     ports:
-      - "0.0.0.0:6666:6666/udp"
-    command: python3 script.py
-
+      - "0.0.0.0:6666:6666"
+    command: python3 api.py

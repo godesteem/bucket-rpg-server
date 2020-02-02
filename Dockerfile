@@ -9,4 +9,4 @@ COPY requirements.txt /opt/data/
 
 RUN pip3 install -r /opt/data/requirements.txt
 
-COPY .. /opt/data
+COPY . /opt/data
