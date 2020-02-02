@@ -5,7 +5,7 @@ RUN apk add gcc build-base
 
 RUN mkdir /opt/data
 WORKDIR /opt/data
-COPY ../requirements.txt /opt/data/
+COPY requirements.txt /opt/data/
 
 RUN pip3 install -r /opt/data/requirements.txt
 
