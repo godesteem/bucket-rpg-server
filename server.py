@@ -10,7 +10,7 @@ import json
 import logging
 import uuid
 
-logging.basicConfig()
+logging.basicConfig(level=logging.INFO)
 
 
 class User:
@@ -22,7 +22,7 @@ class User:
 
     async def send(self, message):
         await self.socket.send(json.dumps(message.to_dict()))
-        print(f'Send message: {message}')
+        logging.info(f'SERVER::Info Send message: {message}')
 
 
 class Message:
@@ -51,7 +51,7 @@ class Message:
 
 
 class Server:
-    STATE = {"value": 0}
+    STATE = {'value': 0}
 
     USERS = list()
     CURRENT_CONNECTED_SOCKET = None
@@ -70,6 +70,7 @@ class Server:
     def remove_user_by_socket(self, websocket):
         drop_user = self.get_user_by_socket(websocket)
         if drop_user:
+            logging.info(f'SERVER::Info Client disconnected: {drop_user.user_id}')
             self.USERS.remove(drop_user)
 
     @staticmethod
@@ -88,31 +89,32 @@ class Server:
 
     @staticmethod
     def users_event(user_id, data):
-        return json.dumps({"type": "M", "user_id": user_id, "data": data})
+        return json.dumps({'type': 'M', 'user_id': user_id, 'data': data})
 
     @staticmethod
     def user_connected_event(user_id):
-        return json.dumps({"type": "C", "user_id": user_id})
+        return json.dumps({'type': 'C', 'user_id': user_id})
 
     @staticmethod
     def user_disconnected_event(user_id):
-        return json.dumps({"type": "D", "user_id": user_id})
+        return json.dumps({'type': 'D', 'user_id': user_id})
     
     async def notify_connect(self, msg):
         if msg.user_id:
             if self.CURRENT_CONNECTED_SOCKET:
                 self.get_user_by_socket(self.CURRENT_CONNECTED_SOCKET).user_id = msg.user_id
                 self.get_user_by_socket(self.CURRENT_CONNECTED_SOCKET).peer_id = msg.peer_id
+                logging.info(f'SERVER::Info New client connected: {msg.user_id}')
                 self.CURRENT_CONNECTED_SOCKET = None
             if len(self.USERS) > 1:
                 await self.bulk_distribute(msg)
-            welcome_message = Message("C", 0, msg.user_id, msg.data, msg.peer_id)
+            welcome_message = Message('C', 0, msg.user_id, msg.data, msg.peer_id)
             user = self.get_user(msg.user_id)
             await user.send(welcome_message)
     
     async def notify_joined(self, msg):
         if len(self.USERS) > 1 and msg.user_id:
-            msg.type = "J"
+            msg.type = 'J'
             for user in self.USERS:
                 await user.send(msg)
     
@@ -139,7 +141,7 @@ class Server:
     
         user.user_id = unique_id
         self.USERS.append(user)
-        await user.send(Message("R", 0, msg.user_id, {"new_user_id": str(unique_id)}, msg.peer_id))
+        await user.send(Message('R', 0, msg.user_id, {'new_user_id': str(unique_id)}, msg.peer_id))
     
         self.registration_open = False
     
@@ -150,10 +152,10 @@ class Server:
     async def system(self, msg):
         signal = msg.data.get('signal')
         if signal:
-            if signal == "done_preconfiguring":
+            if signal == 'done_preconfiguring':
                 user = self.get_user(msg.user_id)
                 user.is_active = True
-                await user.send(Message(type="S", user_id=0, recipient_id=msg.user_id, data={"is_active": True}, peer_id=msg.peer_id))
+                await user.send(Message(type='S', user_id=0, recipient_id=msg.user_id, data={'is_active': True}, peer_id=msg.peer_id))
 
     async def run(self, websocket, path):
         # register(websocket) sends user_event() to websocket
@@ -167,13 +169,13 @@ class Server:
     async def process_event(self, message):
         msg = Message.from_dict(json.loads(message))
         type_map = {
-            "C": self.notify_connect,
-            "J": self.notify_joined,
-            "D": self.notify_disconnect,
-            "M": self.sent_to_all,
-            "P": self.sent_to_all,
-            "R": self.register,
-            "S": self.system,
+            'C': self.notify_connect,
+            'J': self.notify_joined,
+            'D': self.notify_disconnect,
+            'M': self.sent_to_all,
+            'P': self.sent_to_all,
+            'R': self.register,
+            'S': self.system,
         }
         process_method = type_map.get(msg.type)
 
@@ -181,6 +183,6 @@ class Server:
             while self.registration_open:
                 await asyncio.sleep(0.1)
             await process_method(msg)
-            print(f"processed event: {msg}")
+            logging.info(f'SERVER::Info processed event: {msg}')
         else:
-            logging.error(f"unsupported event: {msg}")
+            logging.error(f'unsupported event: {msg}')
